@@ -54,15 +54,124 @@ O projeto é dividido em três níveis de perguntas, criadas para testar habilid
 ### Nível Fácil a Intermediário (10 Perguntas)
 
 1. Encontre o número de lojas em cada país.
+ ```sql
+SELECT
+  r.last_name
+FROM
+  riders AS r
+  INNER JOIN bikes AS b ON r.bike_vin_num = b.vin_num
+  INNER JOIN crew AS c ON r.crew_chief_last_name = c.last_name
+WHERE
+  b.engine_tally > 2;
+```
+
 2. Calcule o total de unidades vendidas por cada loja.
+```sql
+SELECT 
+	s.store_id,
+	st.store_name,
+	SUM(s.quantity) as total_unit_sold
+FROM sales as s
+JOIN
+stores as st
+ON st.store_id = s.store_id
+GROUP BY 1, 2
+ORDER BY 3 DESC
+```
+
 3. Identifique quantas vendas ocorreram em dezembro de 2023.
+```sql
+SELECT 
+	COUNT(sale_id) as total_sale 
+FROM sales
+WHERE TO_CHAR(sale_date, 'MM-YYYY') = '12-2023'
+```
 4. Determine quantas lojas nunca tiveram uma solicitação de garantia registrada.
+```sql
+SELECT COUNT(*) FROM stores
+WHERE store_id NOT IN (
+						SELECT 
+							DISTINCT store_id
+						FROM sales as s
+						RIGHT JOIN warranty as w
+						ON s.sale_id = w.sale_id
+						);
+```
+
 5. Calcule a porcentagem de solicitações de garantia marcadas como "Warranty Void".
+```sql
+no claim that as wv/total claim * 100
+
+SELECT 
+	ROUND
+		(COUNT(claim_id)/
+						(SELECT COUNT(*) FROM warranty)::numeric 
+		* 100, 
+	2)as warranty_void_percentage
+FROM warranty
+WHERE repair_status = 'Warranty Void'
+```
+
 6. Identifique qual loja teve o maior total de unidades vendidas no último ano.
+```sql
+SELECT 
+	s.store_id,
+	st.store_name,
+	SUM(s.quantity)
+FROM sales as s
+JOIN stores as st
+ON s.store_id = st.store_id
+WHERE sale_date >= (CURRENT_DATE - INTERVAL '1 year')
+GROUP BY 1, 2
+ORDER BY 3 DESC
+LIMIT 1
+```
+   
 7. Conte o número de produtos únicos vendidos no último ano.
+```sql
+SELECT 
+	COUNT(DISTINCT product_id)
+FROM sales
+WHERE sale_date >= (CURRENT_DATE - INTERVAL '1 year')
+```
+
 8. Encontre o preço médio dos produtos em cada categoria.
+```sql
+SELECT 
+	p.category_id,
+	c.category_name,
+	AVG(p.price) as avg_price
+FROM products as p
+JOIN 
+category as c
+ON p.category_id = c.category_id
+GROUP BY 1, 2
+ORDER BY 3 DESC
+```
+
 9. Quantas solicitações de garantia foram registradas em 2020?
+```sql
+SELECT 
+	COUNT(*) as warranty_claim
+FROM warranty
+WHERE EXTRACT(YEAR FROM claim_date) = 2020
+```
+ 
 10. Para cada loja, identifique o dia com maior volume de vendas, com base na quantidade total de unidades vendidas.
+```sql
+SELECT  * 
+FROM
+(
+	SELECT 
+		store_id,
+		TO_CHAR(sale_date, 'Day') as day_name,
+		SUM(quantity) as total_unit_sold,
+		RANK() OVER(PARTITION BY store_id ORDER BY SUM(quantity) DESC) as rank
+	FROM sales
+	GROUP BY 1, 2
+) as t1
+WHERE rank = 1
+```
 
 ### Nível Intermediário a Avançado (5 Perguntas)
 
