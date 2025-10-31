@@ -176,10 +176,92 @@ WHERE rank = 1
 ### Nível Intermediário a Avançado (5 Perguntas)
 
 11. Identifique o produto com **menor número de vendas** em cada país para cada ano, com base no total de unidades vendidas.
+```sql
+WITH product_rank
+AS
+(
+SELECT 
+	st.country,
+	p.product_name,
+	SUM(s.quantity) as total_qty_sold,
+	RANK() OVER(PARTITION BY st.country ORDER BY SUM(s.quantity)) as rank
+FROM sales as s
+JOIN 
+stores as st
+ON s.store_id = st.store_id
+JOIN
+products as p
+ON s.product_id = p.product_id
+GROUP BY 1, 2
+)
+SELECT 
+* 
+FROM product_rank
+WHERE rank = 1
+```
+
 12. Calcule quantas **solicitações de garantia** foram registradas dentro de **180 dias** após a venda de um produto.
+```sql
+SELECT 
+	COUNT(*)
+FROM warranty as w
+LEFT JOIN 
+sales as s
+ON s.sale_id = w.sale_id
+WHERE 
+	w.claim_date - sale_date <= 180
+```
 13. Determine quantas solicitações de garantia foram feitas para **produtos lançados nos últimos dois anos**.
+```sql
+SELECT 
+	p.product_name,
+	COUNT(w.claim_id) as no_claim,
+	COUNT(s.sale_id)
+FROM warranty as w
+RIGHT JOIN
+sales as s 
+ON s.sale_id = w.sale_id
+JOIN products as p
+ON p.product_id = s.product_id
+WHERE p.launch_date >= CURRENT_DATE - INTERVAL '2 years'
+GROUP BY 1
+HAVING COUNT(w.claim_id) > 0
+```
+
 14. Liste os **meses dos últimos três anos** em que as vendas **excederam 5.000 unidades nos EUA**.
+```sql
+SELECT 
+	TO_CHAR(sale_date, 'MM-YYYY') as month,
+	SUM(s.quantity) as total_unit_sold
+FROM sales as s
+JOIN 
+stores as st
+ON s.store_id = st.store_id
+WHERE 
+	st.country = 'USA'
+	AND
+	s.sale_date >= CURRENT_DATE - INTERVAL '3 year'
+GROUP BY 1
+HAVING SUM(s.quantity) > 5000
+```
 15. Identifique a **categoria de produto com mais solicitações de garantia** registradas nos últimos dois anos.
+```sql
+SELECT 
+	c.category_name,
+	COUNT(w.claim_id) as total_claims
+FROM warranty as w
+LEFT JOIN
+sales as s
+ON w.sale_id = s.sale_id
+JOIN products as p
+ON p.product_id = s.product_id
+JOIN 
+category as c
+ON c.category_id = p.category_id
+WHERE 
+	w.claim_date >= CURRENT_DATE - INTERVAL '2 year'
+GROUP BY 1
+```
 
 ### Nível Avançado (5 Perguntas)
 
