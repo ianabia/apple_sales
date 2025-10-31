@@ -1,5 +1,5 @@
 
-# ![Apple Logo]([https://github.com/najirh/Apple-Retail-Sales-SQL-Project---Analyzing-Millions-of-Sales-Rows/blob/main/Apple_Changsha_RetailTeamMembers_09012021_big.jpg.slideshow-xlarge_2x.jpg](https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.istockphoto.com%2Fbr%2Ffotos%2Floja-da-apple&psig=AOvVaw3-mqcJyUb7lLca-b4zBLyM&ust=1761957276458000&source=images&cd=vfe&opi=89978449&ved=0CBUQjRxqFwoTCJDF_b2YzZADFQAAAAAdAAAAABAE)) Projeto SQL de Vendas no Varejo da Apple - Analisando Milhões de Linhas de Vendas
+# Projeto SQL de Vendas no Varejo da Apple - Analisando Milhões de Linhas de Vendas
 
 ## Visão Geral do Projeto
 
